@@ -1,0 +1,34 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.coverage
+
+# Локальные настройки и секреты; пример окружения остаётся в репозитории.
+.env.*
+!.env.example
+.envrc
+.idea/
+.vscode/
+.aws/
+.ssh/
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# Логи, дампы и временные артефакты.
+logs/
+dumps/
+*.log
+*.dump
+*.sql.gz
+*.tmp
+*.bak
+*~
+.DS_Store

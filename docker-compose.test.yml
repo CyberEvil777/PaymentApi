@@ -1,0 +1,37 @@
+# Изолированный проект: не затрагивает БД и очереди работающего приложения.
+name: payment-processor-tests
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: payments
+      POSTGRES_PASSWORD: payments
+      POSTGRES_DB: payments_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U payments -d payments_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  rabbitmq:
+    image: rabbitmq:4.1-management-alpine
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: payments
+      RABBITMQ_DEFAULT_PASS: payments
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_port_connectivity"]
+      interval: 3s
+      timeout: 15s
+      start_period: 20s
+      retries: 30
+  tests:
+    build: .
+    init: true
+    stop_grace_period: 45s
+    environment:
+      TEST_DATABASE_URL: postgresql+asyncpg://payments:payments@postgres:5432/payments_test
+      TEST_RABBITMQ_URL: amqp://payments:payments@rabbitmq:5672/
+    command: ["pytest", "-q", "-ra", "-p", "no:cacheprovider"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
